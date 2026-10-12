@@ -1,0 +1,16 @@
+Django>=5.2,<5.3
+djangorestframework>=3.16,<3.17
+django-cors-headers>=4.7,<5
+psycopg[binary]>=3.2,<4
+python-dotenv>=1.1,<2
+whitenoise>=6.9,<7
+
+cryptography>=44
+
+# Local face detection & recognition (OpenCV YuNet + SFace, no cloud services)
+numpy>=1.26,<3
+opencv-python-headless>=4.10,<5
+
+# Production WSGI servers (Gunicorn on Linux, Waitress on Windows)
+gunicorn>=23,<24; sys_platform != "win32"
+waitress>=3.0,<4; sys_platform == "win32"

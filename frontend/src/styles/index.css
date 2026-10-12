@@ -1,0 +1,61 @@
+@import '@fontsource-variable/inter';
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* Brand: deep teal used sparingly for primary actions and selection. */
+  --color-brand-50: #effaf8;
+  --color-brand-100: #d6f1ec;
+  --color-brand-200: #aee2d9;
+  --color-brand-300: #7ccbbf;
+  --color-brand-400: #4aaea1;
+  --color-brand-500: #2e9286;
+  --color-brand-600: #22756c;
+  --color-brand-700: #1e5f58;
+  --color-brand-800: #1c4d48;
+  --color-brand-900: #1a403c;
+
+  /* Ink: navy used for the brand mark and dark surfaces. */
+  --color-ink-700: #1d3a5c;
+  --color-ink-800: #152c47;
+  --color-ink-900: #10233a;
+  --color-ink-950: #0a1828;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-slate-50 font-sans text-slate-900 antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-600;
+  }
+  ::selection {
+    @apply bg-brand-100 text-brand-900;
+  }
+  [type='search']::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+  }
+  dialog::backdrop {
+    background: rgb(15 23 42 / 0.45);
+  }
+}
+
+@layer utilities {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
