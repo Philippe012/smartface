@@ -13,6 +13,7 @@ import {
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 
+import { ScanBanner } from '../../components/ScanBanner'
 import { Badge } from '../../components/ui/Badge'
 import { Button, ButtonLink } from '../../components/ui/Button'
 import { Card, CardBody, CardHeader, StatCard } from '../../components/ui/Card'
@@ -64,14 +65,17 @@ export function DashboardPage() {
   if (services.worker.state !== 'running')
     setupIssues.push({
       title: 'Recognition service is not running',
-      text: 'Automatic attendance is paused. Start it on the server with: python manage.py run_recognition. Use manual entry in the meantime.',
+      text: 'Automatic attendance is paused. Use manual entry in the meantime.',
     })
 
   return (
     <>
-      <PageHeader
-        title="Dashboard"
-        description={`${formatDate(data.date)} · ${data.policy.timezone}`}
+      <ScanBanner
+        title={user?.first_name ? `Welcome back, ${user.first_name}` : 'Dashboard'}
+        documentTitle="Dashboard"
+        subtitle={`${formatDate(data.date)} · ${data.policy.timezone}`}
+        live={services.worker.state === 'running'}
+        status={services.worker.state === 'running' ? 'Recognition running' : 'Recognition paused'}
         actions={
           <>
             <Button variant="secondary" size="sm" icon={RefreshCw} onClick={reload} loading={loading}>

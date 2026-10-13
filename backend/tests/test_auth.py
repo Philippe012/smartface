@@ -115,6 +115,14 @@ class AccountTests(TestCase):
         emp.refresh_from_db()
         self.assertEqual(emp.phone, "+250700000000")
 
+    def test_theme_preference_is_saved_per_user(self):
+        client = client_for(make_user("ada", role="employee", employee=make_employee()))
+        self.assertEqual(client.get(f"{API}/auth/me").json()["theme_preference"], "system")
+        res = client.patch(f"{API}/auth/me", {"theme_preference": "dark"})
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(client.get(f"{API}/auth/me").json()["theme_preference"], "dark")
+        self.assertEqual(client.patch(f"{API}/auth/me", {"theme_preference": "neon"}).status_code, 400)
+
 
 class RolePermissionTests(TestCase):
     def setUp(self):

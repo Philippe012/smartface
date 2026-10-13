@@ -14,7 +14,7 @@ class MeSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             "id", "username", "email", "first_name", "last_name", "role", "employee", "phone",
-            "last_login", "date_joined", "password_changed_at",
+            "last_login", "date_joined", "password_changed_at", "theme_preference",
         ]
         read_only_fields = ["id", "username", "role", "last_login", "date_joined", "password_changed_at"]
 

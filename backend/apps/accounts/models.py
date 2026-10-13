@@ -14,6 +14,11 @@ class User(AbstractUser):
         OPERATOR = "operator", "System operator"
         EMPLOYEE = "employee", "Employee"
 
+    class Theme(models.TextChoices):
+        SYSTEM = "system", "Match device"
+        LIGHT = "light", "Light"
+        DARK = "dark", "Dark"
+
     role = models.CharField(max_length=16, choices=Role.choices, default=Role.EMPLOYEE)
     employee = models.OneToOneField(
         "employees.Employee",
@@ -26,6 +31,7 @@ class User(AbstractUser):
     failed_login_count = models.PositiveIntegerField(default=0)
     locked_until = models.DateTimeField(null=True, blank=True)
     password_changed_at = models.DateTimeField(null=True, blank=True)
+    theme_preference = models.CharField(max_length=8, choices=Theme.choices, default=Theme.SYSTEM)
 
     def save(self, *args, **kwargs):
         if self.is_superuser:

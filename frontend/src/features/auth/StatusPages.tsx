@@ -2,6 +2,7 @@ import { Compass, ShieldAlert } from 'lucide-react'
 import type { ComponentType } from 'react'
 
 import { Logo } from '../../components/Logo'
+import { ThemeToggle } from '../../components/ThemeToggle'
 import { ButtonLink } from '../../components/ui/Button'
 import { useDocumentTitle } from '../../hooks/useApi'
 import { homeFor, useAuth } from './AuthContext'
@@ -21,11 +22,15 @@ function StatusPage({
   const { user } = useAuth()
   return (
     <div className="flex min-h-dvh flex-col px-4 py-8 sm:px-8">
-      <Logo />
+      <div className="flex items-center justify-between">
+        <Logo />
+        <ThemeToggle />
+      </div>
       <main className="flex flex-1 items-center justify-center">
-        <div className="max-w-md text-center">
-          <span className="mx-auto flex size-12 items-center justify-center rounded-full bg-slate-100 text-slate-600">
-            <Icon size={22} aria-hidden />
+        <div className="max-w-md animate-page-in text-center">
+          <span className="relative mx-auto flex size-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-700 ring-1 ring-brand-200">
+            <span className="absolute inset-0 animate-pulse-ring rounded-2xl border border-brand-400/50" aria-hidden />
+            <Icon size={24} aria-hidden />
           </span>
           <p className="mt-5 text-sm font-semibold text-brand-700">{code}</p>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900">{title}</h1>

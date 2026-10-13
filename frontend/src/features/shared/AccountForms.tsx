@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
+import { ThemeSelector } from '../../components/ThemeToggle'
 import { Button } from '../../components/ui/Button'
 import { Card, CardBody, CardHeader, DetailList } from '../../components/ui/Card'
 import { Alert } from '../../components/ui/Feedback'
@@ -15,6 +16,18 @@ import { formatDateTime } from '../../lib/format'
 import { applyServerErrors } from '../../lib/forms'
 import type { CurrentUser } from '../../types/api'
 import { useAuth } from '../auth/AuthContext'
+
+/** Light / dark / device theme, saved to the signed-in account. */
+export function AppearanceCard() {
+  return (
+    <Card>
+      <CardHeader title="Appearance" description="Applies everywhere you sign in." />
+      <CardBody>
+        <ThemeSelector />
+      </CardBody>
+    </Card>
+  )
+}
 
 const profileSchema = z.object({
   first_name: z.string().trim().max(150),

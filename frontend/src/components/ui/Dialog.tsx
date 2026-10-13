@@ -45,7 +45,7 @@ export function Dialog({
         if (e.target === ref.current) onClose()
       }}
       className={clsx(
-        'm-auto w-[calc(100%-2rem)] rounded-lg border border-slate-200 bg-white p-0 text-slate-900 shadow-xl',
+        'm-auto w-[calc(100%-2rem)] rounded-xl border border-slate-200 bg-surface p-0 text-slate-900 shadow-2xl',
         { sm: 'max-w-md', md: 'max-w-lg', lg: 'max-w-2xl' }[size],
       )}
     >

@@ -7,16 +7,16 @@ type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'danger-outline'
 type Size = 'sm' | 'md'
 
 const base =
-  'inline-flex items-center justify-center gap-2 rounded-md font-medium whitespace-nowrap transition-colors ' +
+  'inline-flex items-center justify-center gap-2 rounded-lg font-medium whitespace-nowrap transition-all duration-200 active:scale-[0.98] ' +
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 ' +
   'disabled:cursor-not-allowed disabled:opacity-55'
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-brand-700 text-white shadow-xs hover:bg-brand-800',
-  secondary: 'border border-slate-300 bg-white text-slate-700 shadow-xs hover:bg-slate-50 hover:text-slate-900',
+  primary: 'bg-primary text-primary-fg shadow-sm shadow-brand-700/20 hover:bg-primary-hover hover:shadow-md hover:shadow-brand-500/25',
+  secondary: 'border border-slate-300 bg-surface text-slate-700 shadow-xs hover:bg-slate-50 hover:text-slate-900',
   ghost: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
-  danger: 'bg-red-600 text-white shadow-xs hover:bg-red-700',
-  'danger-outline': 'border border-red-200 bg-white text-red-700 shadow-xs hover:bg-red-50',
+  danger: 'bg-danger text-white shadow-xs hover:bg-danger-hover',
+  'danger-outline': 'border border-red-200 bg-surface text-red-700 shadow-xs hover:bg-red-50',
 }
 
 const sizes: Record<Size, string> = {

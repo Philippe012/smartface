@@ -258,7 +258,7 @@ function CaptureStep({ session: initial, onDone }: { session: EnrollmentSession;
           }
         />
         <CardBody className="space-y-4">
-          <div className="relative aspect-video overflow-hidden rounded-md bg-slate-900">
+          <div className="relative aspect-video overflow-hidden rounded-md bg-ink-950">
             {source === 'webcam' ? (
               <>
                 <video ref={webcam.videoRef} className="size-full -scale-x-100 object-cover" playsInline muted aria-label="Live camera preview" />
@@ -268,14 +268,14 @@ function CaptureStep({ session: initial, onDone }: { session: EnrollmentSession;
                   </div>
                 )}
                 {webcam.state !== 'ready' && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center text-sm text-slate-300">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center text-sm text-white/70">
                     {webcam.state === 'error' ? <CameraOff size={28} aria-hidden /> : <Video size={28} aria-hidden />}
                     <p className="max-w-sm">{webcam.error ?? 'Starting camera…'}</p>
                   </div>
                 )}
               </>
             ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center text-sm text-slate-300">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center text-sm text-white/70">
                 <CameraIcon size={28} aria-hidden />
                 <p className="max-w-sm">
                   A single frame is taken from the selected camera when you press Capture. Ask the employee to stand in

@@ -19,7 +19,7 @@ import { formatBytes, formatDateTime, formatRelative, humanize, WEEKDAYS } from 
 import { applyServerErrors } from '../../../lib/forms'
 import type { BackupRecord, StaffUser, SystemSettings, SystemStatus } from '../../../types/api'
 import { useAuth } from '../../auth/AuthContext'
-import { PasswordChangeCard, ProfileForm, SessionsCard } from '../../shared/AccountForms'
+import { AppearanceCard, PasswordChangeCard, ProfileForm, SessionsCard } from '../../shared/AccountForms'
 import { WorkerBadge } from '../../shared/StatusBadges'
 import { SETTINGS_SECTIONS } from './SettingsLayout'
 
@@ -54,8 +54,11 @@ export function SettingsIndexPage() {
 export function AccountSettingsPage() {
   return (
     <>
-      <PageHeader title="Account" description="Your administrator profile." />
-      <ProfileForm />
+      <PageHeader title="Account" description="Your profile and appearance." />
+      <div className="space-y-6">
+        <AppearanceCard />
+        <ProfileForm />
+      </div>
     </>
   )
 }
@@ -359,8 +362,8 @@ export function AttendanceSettingsPage() {
                     }
                     className={
                       on
-                        ? 'h-9 w-12 rounded-md bg-ink-900 text-sm font-medium text-white disabled:opacity-50'
-                        : 'h-9 w-12 rounded-md border border-slate-300 bg-white text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50'
+                        ? 'h-9 w-12 rounded-md bg-primary text-sm font-medium text-primary-fg disabled:opacity-50'
+                        : 'h-9 w-12 rounded-md border border-slate-300 bg-surface text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50'
                     }
                   >
                     {day}
@@ -594,7 +597,7 @@ export function BackupSettingsPage() {
               passwords in a restored database cannot be decrypted.
             </p>
             <p>Restore into an empty database (see the README for the full procedure):</p>
-            <pre className="overflow-x-auto rounded-md bg-slate-900 p-3 text-xs text-slate-100">
+            <pre className="overflow-x-auto rounded-md bg-ink-950 p-3 text-xs text-white/90">
               pg_restore --clean --if-exists --no-owner -h 127.0.0.1 -U postgres -d SmartFace backups/smartface-YYYYMMDD-HHMMSS.dump
             </pre>
             <p>Test a restore on a separate machine on a regular schedule.</p>
@@ -664,7 +667,7 @@ export function SystemSettingsPage() {
               <UserCog size={16} className="text-slate-400" aria-hidden />
               The API server and the recognition worker are separate processes. Both must run for automatic attendance.
             </p>
-            <pre className="overflow-x-auto rounded-md bg-slate-900 p-3 text-xs text-slate-100">
+            <pre className="overflow-x-auto rounded-md bg-ink-950 p-3 text-xs text-white/90">
 {`python manage.py run_recognition     # recognition worker
 python manage.py runserver           # development API server`}
             </pre>

@@ -166,7 +166,7 @@ export function AttendancePage() {
               aria-pressed={filters.match_status === value}
               className={
                 filters.match_status === value
-                  ? 'rounded-full bg-ink-900 px-3 py-1 text-xs font-medium text-white'
+                  ? 'rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-fg'
                   : 'rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 hover:bg-slate-200'
               }
             >

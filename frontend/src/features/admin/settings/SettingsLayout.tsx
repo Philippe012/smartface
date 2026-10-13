@@ -5,7 +5,7 @@ import { NavLink, Outlet } from 'react-router'
 import { useAuth } from '../../auth/AuthContext'
 
 export const SETTINGS_SECTIONS = [
-  { to: 'account', label: 'Account', icon: UserRound, description: 'Your name and email address.', adminOnly: false },
+  { to: 'account', label: 'Account', icon: UserRound, description: 'Profile, email and light/dark theme.', adminOnly: false },
   { to: 'security', label: 'Security', icon: Lock, description: 'Password, sessions and staff accounts.', adminOnly: false },
   { to: 'attendance', label: 'Attendance & recognition', icon: CalendarClock, description: 'Policy, schedule, thresholds and duplicate suppression.', adminOnly: true },
   { to: 'privacy', label: 'Privacy', icon: ShieldCheck, description: 'Privacy notice and the alternative attendance method.', adminOnly: true },
@@ -28,7 +28,7 @@ export function SettingsLayout() {
                 className={({ isActive }) =>
                   clsx(
                     'flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap',
-                    isActive ? 'bg-white text-slate-900 shadow-xs ring-1 ring-slate-200' : 'text-slate-600 hover:bg-white/70 hover:text-slate-900',
+                    isActive ? 'bg-surface text-slate-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-600 transition-colors hover:bg-surface/70 hover:text-slate-900',
                   )
                 }
               >

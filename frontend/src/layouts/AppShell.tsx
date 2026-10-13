@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ComponentType } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 
 import { Logo } from '../components/Logo'
+import { ThemeToggle } from '../components/ThemeToggle'
 import { useOnlineStatus } from '../hooks/useApi'
 import { initials } from '../lib/format'
 import { useAuth } from '../features/auth/AuthContext'
@@ -38,14 +39,16 @@ function NavList({ groups, onNavigate }: { groups: NavGroup[]; onNavigate?: () =
                   onClick={onNavigate}
                   className={({ isActive }) =>
                     clsx(
-                      'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                      isActive ? 'bg-brand-50 text-brand-800' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+                      'group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
+                      isActive
+                        ? 'bg-brand-50 text-brand-800 before:absolute before:inset-y-1.5 before:-left-3 before:w-1 before:rounded-r-full before:bg-linear-to-b before:from-cyan-400 before:to-emerald-400'
+                        : 'text-slate-600 hover:translate-x-0.5 hover:bg-slate-100 hover:text-slate-900',
                     )
                   }
                 >
                   {({ isActive }) => (
                     <>
-                      <item.icon size={18} className={isActive ? 'text-brand-700' : 'text-slate-400'} aria-hidden />
+                      <item.icon size={18} className={clsx('transition-colors', isActive ? 'text-brand-700' : 'text-slate-400 group-hover:text-slate-600')} aria-hidden />
                       <span className="flex-1">{item.label}</span>
                       {!!item.badge && (
                         <span className="tabular rounded-full bg-amber-100 px-1.5 py-px text-[11px] font-semibold text-amber-800">
@@ -102,9 +105,9 @@ function AccountMenu({ settingsPath, securityPath }: { settingsPath: string; sec
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-haspopup="menu"
-        className="flex items-center gap-2.5 rounded-md py-1 pr-1.5 pl-1 hover:bg-slate-100"
+        className="flex items-center gap-2.5 rounded-full py-1 pr-2 pl-1 transition-colors hover:bg-slate-100"
       >
-        <span className="flex size-8 items-center justify-center rounded-full bg-ink-900 text-xs font-semibold text-white">
+        <span className="flex size-8 items-center justify-center rounded-full bg-linear-to-br from-cyan-400 to-emerald-400 text-xs font-bold text-ink-950 ring-2 ring-surface">
           {initials(name)}
         </span>
         <span className="hidden text-left sm:block">
@@ -116,7 +119,7 @@ function AccountMenu({ settingsPath, securityPath }: { settingsPath: string; sec
       {open && (
         <div
           role="menu"
-          className="absolute right-0 z-40 mt-2 w-60 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+          className="absolute right-0 z-40 mt-2 w-60 origin-top-right animate-page-in overflow-hidden rounded-xl border border-slate-200 bg-surface py-1 shadow-xl"
         >
           <div className="border-b border-slate-100 px-4 py-3">
             <p className="truncate text-sm font-medium text-slate-900">{name}</p>
@@ -183,18 +186,18 @@ export function AppShell({
 
   return (
     <div className="min-h-dvh">
-      <a href="#main" className="sr-only z-50 rounded bg-white px-3 py-2 focus:not-sr-only focus:fixed focus:top-2 focus:left-2">
+      <a href="#main" className="sr-only z-50 rounded bg-surface px-3 py-2 focus:not-sr-only focus:fixed focus:top-2 focus:left-2">
         Skip to content
       </a>
 
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-slate-200 bg-white lg:block">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-slate-200 bg-surface lg:block">
         {sidebar()}
       </aside>
 
       {mobileOpen && (
         <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true" aria-label="Navigation">
-          <div className="absolute inset-0 bg-slate-900/40" onClick={() => setMobileOpen(false)} aria-hidden />
-          <div className="absolute inset-y-0 left-0 w-72 max-w-[85vw] bg-white shadow-xl">
+          <div className="absolute inset-0 bg-ink-950/50 backdrop-blur-sm" onClick={() => setMobileOpen(false)} aria-hidden />
+          <div className="absolute inset-y-0 left-0 w-72 max-w-[85vw] animate-page-in bg-surface shadow-2xl">
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
@@ -209,7 +212,7 @@ export function AppShell({
       )}
 
       <div className="lg:pl-64">
-        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6">
+        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-slate-200 bg-surface/75 px-4 backdrop-blur-xl sm:px-6">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
@@ -222,6 +225,7 @@ export function AppShell({
             <Logo />
           </Link>
           <div className="flex-1" />
+          <ThemeToggle />
           <AccountMenu settingsPath={settingsPath} securityPath={securityPath} />
         </header>
 
@@ -233,7 +237,9 @@ export function AppShell({
         )}
 
         <main id="main" className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-          <Outlet />
+          <div key={location.pathname} className="animate-page-in">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

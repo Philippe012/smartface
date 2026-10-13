@@ -9,6 +9,7 @@ import { ForgotPasswordPage, ResetPasswordPage } from '../features/auth/Password
 import { RequireRole } from '../features/auth/RequireRole'
 import { NotFoundPage, UnauthorizedPage } from '../features/auth/StatusPages'
 import { LandingPage } from '../features/landing/LandingPage'
+import { ThemeProvider } from '../features/theme/ThemeContext'
 
 /** Lazy-load a named export so each area is split into its own chunk. */
 function page<M extends Record<string, unknown>>(loader: () => Promise<M>, name: keyof M) {
@@ -60,72 +61,74 @@ export function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <ToastProvider>
-          <Suspense fallback={<LoadingBlock />}>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/reset-password" element={<ResetPasswordPage />} />
-              <Route path="/unauthorized" element={<UnauthorizedPage />} />
+        <ThemeProvider>
+          <ToastProvider>
+            <Suspense fallback={<LoadingBlock />}>
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-              <Route
-                path="/admin"
-                element={
-                  <RequireRole roles={['admin', 'operator']}>
-                    <AdminLayout />
-                  </RequireRole>
-                }
-              >
-                <Route index element={<Navigate to="dashboard" replace />} />
-                <Route path="dashboard" element={<DashboardPage />} />
-                <Route path="employees" element={<EmployeesPage />} />
-                <Route path="employees/new" element={<AdminOnly><EmployeeFormPage /></AdminOnly>} />
-                <Route path="employees/:id" element={<EmployeeDetailPage />} />
-                <Route path="employees/:id/edit" element={<AdminOnly><EmployeeFormPage /></AdminOnly>} />
-                <Route path="employees/:id/enrollment" element={<AdminOnly><EnrollmentPage /></AdminOnly>} />
-                <Route path="attendance" element={<AttendancePage />} />
-                <Route path="attendance/:id" element={<AttendanceDetailPage />} />
-                <Route path="cameras" element={<CamerasPage />} />
-                <Route path="cameras/new" element={<AdminOnly><CameraNewPage /></AdminOnly>} />
-                <Route path="cameras/:id" element={<CameraDetailPage />} />
-                <Route path="reports" element={<ReportsPage />} />
-                <Route path="reviews" element={<ReviewsPage />} />
-                <Route path="audit-logs" element={<AdminOnly><AuditLogsPage /></AdminOnly>} />
-                <Route path="settings" element={<SettingsIndexPage />} />
-                <Route path="settings" element={<SettingsLayout />}>
-                  <Route path="account" element={<AccountSettingsPage />} />
-                  <Route path="security" element={<SecuritySettingsPage />} />
-                  <Route path="attendance" element={<AdminOnly><AttendanceSettingsPage /></AdminOnly>} />
-                  <Route path="privacy" element={<AdminOnly><PrivacySettingsPage /></AdminOnly>} />
-                  <Route path="retention" element={<AdminOnly><RetentionSettingsPage /></AdminOnly>} />
-                  <Route path="backup" element={<AdminOnly><BackupSettingsPage /></AdminOnly>} />
-                  <Route path="system" element={<SystemSettingsPage />} />
+                <Route
+                  path="/admin"
+                  element={
+                    <RequireRole roles={['admin', 'operator']}>
+                      <AdminLayout />
+                    </RequireRole>
+                  }
+                >
+                  <Route index element={<Navigate to="dashboard" replace />} />
+                  <Route path="dashboard" element={<DashboardPage />} />
+                  <Route path="employees" element={<EmployeesPage />} />
+                  <Route path="employees/new" element={<AdminOnly><EmployeeFormPage /></AdminOnly>} />
+                  <Route path="employees/:id" element={<EmployeeDetailPage />} />
+                  <Route path="employees/:id/edit" element={<AdminOnly><EmployeeFormPage /></AdminOnly>} />
+                  <Route path="employees/:id/enrollment" element={<AdminOnly><EnrollmentPage /></AdminOnly>} />
+                  <Route path="attendance" element={<AttendancePage />} />
+                  <Route path="attendance/:id" element={<AttendanceDetailPage />} />
+                  <Route path="cameras" element={<CamerasPage />} />
+                  <Route path="cameras/new" element={<AdminOnly><CameraNewPage /></AdminOnly>} />
+                  <Route path="cameras/:id" element={<CameraDetailPage />} />
+                  <Route path="reports" element={<ReportsPage />} />
+                  <Route path="reviews" element={<ReviewsPage />} />
+                  <Route path="audit-logs" element={<AdminOnly><AuditLogsPage /></AdminOnly>} />
+                  <Route path="settings" element={<SettingsIndexPage />} />
+                  <Route path="settings" element={<SettingsLayout />}>
+                    <Route path="account" element={<AccountSettingsPage />} />
+                    <Route path="security" element={<SecuritySettingsPage />} />
+                    <Route path="attendance" element={<AdminOnly><AttendanceSettingsPage /></AdminOnly>} />
+                    <Route path="privacy" element={<AdminOnly><PrivacySettingsPage /></AdminOnly>} />
+                    <Route path="retention" element={<AdminOnly><RetentionSettingsPage /></AdminOnly>} />
+                    <Route path="backup" element={<AdminOnly><BackupSettingsPage /></AdminOnly>} />
+                    <Route path="system" element={<SystemSettingsPage />} />
+                  </Route>
                 </Route>
-              </Route>
 
-              <Route
-                path="/employee"
-                element={
-                  <RequireRole roles={['employee']}>
-                    <EmployeeLayout />
-                  </RequireRole>
-                }
-              >
-                <Route index element={<Navigate to="dashboard" replace />} />
-                <Route path="dashboard" element={<EmployeeDashboardPage />} />
-                <Route path="attendance" element={<MyAttendancePage />} />
-                <Route path="attendance/:id" element={<MyAttendanceDetailPage />} />
-                <Route path="profile" element={<ProfilePage />} />
-                <Route path="settings" element={<EmployeeSettingsPage />} />
-                <Route path="security" element={<EmployeeSecurityPage />} />
-                <Route path="correction-requests" element={<CorrectionRequestsPage />} />
-              </Route>
+                <Route
+                  path="/employee"
+                  element={
+                    <RequireRole roles={['employee']}>
+                      <EmployeeLayout />
+                    </RequireRole>
+                  }
+                >
+                  <Route index element={<Navigate to="dashboard" replace />} />
+                  <Route path="dashboard" element={<EmployeeDashboardPage />} />
+                  <Route path="attendance" element={<MyAttendancePage />} />
+                  <Route path="attendance/:id" element={<MyAttendanceDetailPage />} />
+                  <Route path="profile" element={<ProfilePage />} />
+                  <Route path="settings" element={<EmployeeSettingsPage />} />
+                  <Route path="security" element={<EmployeeSecurityPage />} />
+                  <Route path="correction-requests" element={<CorrectionRequestsPage />} />
+                </Route>
 
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </Suspense>
-        </ToastProvider>
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            </Suspense>
+          </ToastProvider>
+        </ThemeProvider>
       </AuthProvider>
     </BrowserRouter>
   )

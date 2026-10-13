@@ -1,26 +1,137 @@
 @import '@fontsource-variable/inter';
 @import 'tailwindcss';
 
+/* Dark mode is class-driven (see lib/theme.ts) so a saved per-user preference can override the OS. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
-  /* Brand: deep teal used sparingly for primary actions and selection. */
-  --color-brand-50: #effaf8;
-  --color-brand-100: #d6f1ec;
-  --color-brand-200: #aee2d9;
-  --color-brand-300: #7ccbbf;
-  --color-brand-400: #4aaea1;
-  --color-brand-500: #2e9286;
-  --color-brand-600: #22756c;
-  --color-brand-700: #1e5f58;
-  --color-brand-800: #1c4d48;
-  --color-brand-900: #1a403c;
+  /* Brand: aqua-mint taken from the SmartFace logo's scan brackets. */
+  --color-brand-50: #ecfdf9;
+  --color-brand-100: #cffaf0;
+  --color-brand-200: #a0f2e0;
+  --color-brand-300: #5fe3cc;
+  --color-brand-400: #24ccb4;
+  --color-brand-500: #0db39c;
+  --color-brand-600: #07917f;
+  --color-brand-700: #0a7467;
+  --color-brand-800: #0e5c53;
+  --color-brand-900: #104c45;
+  --color-brand-950: #022c28;
 
-  /* Ink: navy used for the brand mark and dark surfaces. */
-  --color-ink-700: #1d3a5c;
-  --color-ink-800: #152c47;
-  --color-ink-900: #10233a;
-  --color-ink-950: #0a1828;
+  /* Ink: the logo's deep navy, used for always-dark surfaces in both themes. */
+  --color-ink-700: #12324c;
+  --color-ink-800: #0b2236;
+  --color-ink-900: #06192a;
+  --color-ink-950: #03121f;
+
+  /* Semantic surfaces and actions. These are the tokens that flip with the theme. */
+  --color-canvas: #f6f8fb;
+  --color-surface: #ffffff;
+  --color-primary: #0a7467;
+  --color-primary-hover: #0e5c53;
+  --color-primary-fg: #ffffff;
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
+
+  --animate-scan: scan 3.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-pulse-ring: pulse-ring 2.4s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+  --animate-blink: blink 1.6s ease-in-out infinite;
+  --animate-page-in: page-in 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-gradient: gradient-pan 8s linear infinite;
+  --animate-spin-slow: spin 18s linear infinite;
+
+  @keyframes scan {
+    0%, 100% { transform: translateY(0%); }
+    50% { transform: translateY(var(--scan-distance, 100%)); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes pulse-ring {
+    0% { transform: scale(0.6); opacity: 0.9; }
+    100% { transform: scale(2.4); opacity: 0; }
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 1; }
+  }
+  @keyframes page-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes gradient-pan {
+    to { background-position: 200% center; }
+  }
+}
+
+/*
+ * Dark theme. Rather than sprinkle dark: variants over every page, the neutral and
+ * status palettes are remapped: light tints become translucent glows on navy,
+ * and dark text shades become light. 500-level "signal" colours stay as they are.
+ */
+.dark {
+  color-scheme: dark;
+
+  --color-canvas: #050f19;
+  --color-surface: #0b1825;
+  --color-primary: #2ee0c0;
+  --color-primary-hover: #6aefd7;
+  --color-primary-fg: #02211d;
+  --color-danger: #ef4444;
+  --color-danger-hover: #dc2626;
+
+  --color-slate-50: #0e1c2a;
+  --color-slate-100: #132434;
+  --color-slate-200: #1b2e41;
+  --color-slate-300: #2a4057;
+  --color-slate-400: #637a92;
+  --color-slate-500: #8b9fb4;
+  --color-slate-600: #a8b8c9;
+  --color-slate-700: #c3d0dd;
+  --color-slate-800: #d9e2eb;
+  --color-slate-900: #ecf2f7;
+  --color-slate-950: #f8fafc;
+
+  --color-brand-50: rgb(36 204 180 / 0.1);
+  --color-brand-100: rgb(36 204 180 / 0.16);
+  --color-brand-200: rgb(36 204 180 / 0.3);
+  --color-brand-700: #3fe0c4;
+  --color-brand-800: #7aeedb;
+  --color-brand-900: #b8f7ec;
+
+  --color-emerald-50: rgb(16 185 129 / 0.1);
+  --color-emerald-100: rgb(16 185 129 / 0.16);
+  --color-emerald-200: rgb(16 185 129 / 0.3);
+  --color-emerald-600: #34d399;
+  --color-emerald-700: #6ee7b7;
+  --color-emerald-800: #a7f3d0;
+  --color-emerald-900: #d1fae5;
+
+  --color-amber-50: rgb(245 158 11 / 0.1);
+  --color-amber-100: rgb(245 158 11 / 0.16);
+  --color-amber-200: rgb(245 158 11 / 0.3);
+  --color-amber-600: #fbbf24;
+  --color-amber-700: #fcd34d;
+  --color-amber-800: #fde68a;
+  --color-amber-900: #fef3c7;
+
+  --color-red-50: rgb(239 68 68 / 0.1);
+  --color-red-100: rgb(239 68 68 / 0.16);
+  --color-red-200: rgb(239 68 68 / 0.3);
+  --color-red-400: #f87171;
+  --color-red-600: #f87171;
+  --color-red-700: #fca5a5;
+  --color-red-900: #fee2e2;
+
+  --color-sky-50: rgb(14 165 233 / 0.1);
+  --color-sky-200: rgb(14 165 233 / 0.3);
+  --color-sky-600: #38bdf8;
+  --color-sky-800: #bae6fd;
+  --color-sky-900: #e0f2fe;
 }
 
 @layer base {
@@ -28,20 +139,83 @@
     -webkit-text-size-adjust: 100%;
   }
   body {
-    @apply bg-slate-50 font-sans text-slate-900 antialiased;
+    @apply bg-canvas font-sans text-slate-900 antialiased;
     font-feature-settings: 'cv11', 'ss01';
   }
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-brand-600;
+    @apply outline-2 outline-offset-2 outline-brand-500;
   }
   ::selection {
-    @apply bg-brand-100 text-brand-900;
+    @apply bg-brand-200 text-brand-900;
   }
   [type='search']::-webkit-search-cancel-button {
     -webkit-appearance: none;
   }
   dialog::backdrop {
-    background: rgb(15 23 42 / 0.45);
+    background: rgb(3 18 31 / 0.55);
+    backdrop-filter: blur(3px);
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-slate-300);
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background-clip: padding-box;
+  }
+}
+
+@keyframes fill-bar {
+  from { width: 4%; }
+  to { width: 100%; }
+}
+
+/* Smooth cross-fade when the theme changes (browsers with View Transitions). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.35s;
+}
+
+@layer components {
+  /* Cards and panels that pick up a faint brand glow in dark mode. */
+  .glass {
+    @apply border border-slate-200 bg-surface/80 backdrop-blur-xl;
+  }
+  /* Logo gradient; deeper on light backgrounds, neon on dark ones (.dark or .on-dark). */
+  .text-gradient {
+    --grad-a: #0891b2;
+    --grad-b: #059669;
+    background: linear-gradient(90deg, var(--grad-a), var(--grad-b), var(--grad-a));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .dark .text-gradient,
+  .on-dark .text-gradient {
+    --grad-a: #19e3f0;
+    --grad-b: #2af5a0;
+  }
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, rgb(148 163 184 / 0.12) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(148 163 184 / 0.12) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+  /* Scroll-reveal: elements fade up once they enter the viewport (see useReveal). */
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
+      transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+  .reveal[data-visible='true'] {
+    opacity: 1;
+    transform: none;
   }
 }
 
@@ -56,6 +230,11 @@
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
   }
 }

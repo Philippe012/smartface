@@ -1,314 +1,394 @@
+import clsx from 'clsx'
 import {
   ArrowRight,
   BadgeCheck,
   Camera,
   ChevronDown,
   ClipboardCheck,
-  Database,
   FileBarChart,
-  Fingerprint,
   History,
   LockKeyhole,
-  Network,
   ScanFace,
   ServerCog,
   ShieldCheck,
-  UserCheck,
-  Users,
+  UserPlus,
+  Zap,
 } from 'lucide-react'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { Link } from 'react-router'
 
+import { FaceScan } from '../../components/FaceScan'
 import { Logo } from '../../components/Logo'
+import { ThemeToggle } from '../../components/ThemeToggle'
 import { ButtonLink } from '../../components/ui/Button'
 import { useDocumentTitle } from '../../hooks/useApi'
-import { useAuth, homeFor } from '../auth/AuthContext'
-
-const features = [
-  {
-    icon: ScanFace,
-    title: 'Automatic IN recording',
-    text: 'An entrance camera recognises enrolled employees and records their arrival. Repeated sightings are merged, never turned into extra records.',
-  },
-  {
-    icon: UserCheck,
-    title: 'Guided enrollment',
-    text: 'Administrators capture several quality-checked views of each employee after notice and consent are documented. Poor samples are rejected with clear guidance.',
-  },
-  {
-    icon: ClipboardCheck,
-    title: 'Human review for uncertain matches',
-    text: 'When a face is unclear or ambiguous, SmartFace abstains and queues the observation for a person to confirm or dismiss.',
-  },
-  {
-    icon: History,
-    title: 'Corrections with a full audit trail',
-    text: 'Every correction keeps who made it, when, why and the before/after values. Employees can request corrections from their own portal.',
-  },
-  {
-    icon: FileBarChart,
-    title: 'Daily and monthly reports',
-    text: 'Filter attendance by date, employee and camera, and export permitted reports to CSV. Lateness is only calculated once your policy is configured.',
-  },
-  {
-    icon: Camera,
-    title: 'Honest camera health',
-    text: 'Camera status comes from real frames received by the recognition service. A disconnected camera is shown as disconnected.',
-  },
-]
+import { useReveal } from '../../hooks/useReveal'
+import { homeFor, useAuth } from '../auth/AuthContext'
 
 const steps = [
-  { title: 'Enroll', text: 'Create the employee record, record notice and consent, then capture guided face samples.' },
-  { title: 'Detect', text: 'The recognition service samples frames from the local entrance camera and checks image quality.' },
-  { title: 'Match locally', text: 'Encrypted templates are compared on your server against active employees using validated thresholds.' },
-  { title: 'Record or review', text: 'Confident matches create one IN record per day. Everything else is held for human review.' },
+  { icon: UserPlus, title: 'Enroll', text: 'Consent first, then a few guided captures.' },
+  { icon: ScanFace, title: 'Detect', text: 'The entrance camera finds clear faces.' },
+  { icon: LockKeyhole, title: 'Match locally', text: 'Encrypted templates, on your server.' },
+  { icon: BadgeCheck, title: 'Record', text: 'One IN per day. Unsure? A person reviews.' },
 ]
 
 const faqs = [
-  {
-    q: 'Does SmartFace send face data to the cloud?',
-    a: 'No. Detection and matching run on your own server using locally installed open models. No paid cloud AI or external face-recognition API is used, and core functions keep working without internet access.',
-  },
-  {
-    q: 'Are photos of employees stored?',
-    a: 'Not by default. Camera frames and enrollment images are processed in memory and discarded. Only an encrypted numerical template is kept, and it can be revoked and deleted at any time.',
-  },
-  {
-    q: 'What happens if the system is not sure who someone is?',
-    a: 'It abstains. Uncertain and unknown observations are never assigned to an employee automatically; an administrator reviews them. A manual attendance method is always available.',
-  },
-  {
-    q: 'Does it record when people leave?',
-    a: 'The first release records arrivals (IN) from one entrance camera. Departures will use a dedicated exit camera in a later release; leaving is never inferred from a second sighting.',
-  },
-  {
-    q: 'Can attendance data be used to make decisions about employees automatically?',
-    a: 'It should not be. Recognition confidence is a system signal, not proof of identity. Records can be reviewed and corrected, and consequential decisions should always involve people.',
-  },
-  {
-    q: 'What do we need before going live?',
-    a: 'A compatible local IP camera, a server on your network, an approved attendance policy, and a privacy and employment review covering lawful basis, notices, retention and alternatives for employees.',
-  },
+  { q: 'Does face data leave our network?', a: 'No. Detection and matching run on your own server with local models. No cloud recognition APIs, and it keeps working offline.' },
+  { q: 'Are photos stored?', a: 'Not by default. Frames are processed in memory and discarded; only an encrypted template is kept, and it can be revoked at any time.' },
+  { q: 'What if it isn’t sure who someone is?', a: 'It abstains. Uncertain faces are never assigned automatically — they wait for a person to review.' },
+  { q: 'Can employees see their own records?', a: 'Yes. Employees have a portal to view their attendance and request corrections, with every change audited.' },
 ]
 
-function Section({ id, eyebrow, title, intro, children }: { id: string; eyebrow: string; title: string; intro?: string; children: React.ReactNode }) {
+const arrivals = [
+  { name: 'Amina Uwase', time: '08:02', score: 97 },
+  { name: 'Eric Nshuti', time: '08:03', score: 95 },
+  { name: 'Grace Mutoni', time: '08:05', score: 94 },
+  { name: 'Diane Ingabire', time: '08:07', score: 98 },
+  { name: 'Jean-Paul H.', time: '08:09', score: 96 },
+  { name: 'Patrick Mugisha', time: '08:11', score: 93 },
+]
+
+function Eyebrow({ children }: { children: ReactNode }) {
   return (
-    <section id={id} className="scroll-mt-20 px-4 py-16 sm:px-6 sm:py-20">
-      <div className="mx-auto max-w-6xl">
-        <div className="max-w-2xl">
-          <p className="text-sm font-semibold text-brand-700">{eyebrow}</p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">{title}</h2>
-          {intro && <p className="mt-3 text-base text-slate-600">{intro}</p>}
-        </div>
-        <div className="mt-10">{children}</div>
+    <p className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-semibold tracking-wide text-brand-800">
+      {children}
+    </p>
+  )
+}
+
+function SectionTitle({ eyebrow, title, className }: { eyebrow: string; title: ReactNode; className?: string }) {
+  return (
+    <div className={clsx('reveal mx-auto max-w-2xl text-center', className)}>
+      <Eyebrow>{eyebrow}</Eyebrow>
+      <h2 className="mt-4 text-3xl font-semibold tracking-tight text-balance text-slate-900 sm:text-4xl">{title}</h2>
+    </div>
+  )
+}
+
+/** Live arrivals list that keeps ticking new entries in. */
+function ArrivalsTicker() {
+  const [offset, setOffset] = useState(0)
+  useEffect(() => {
+    const t = window.setInterval(() => setOffset((o) => (o + 1) % arrivals.length), 2200)
+    return () => window.clearInterval(t)
+  }, [])
+  const rows = Array.from({ length: 4 }, (_, i) => arrivals[(offset + arrivals.length - i) % arrivals.length]!)
+  return (
+    <ul className="space-y-2">
+      {rows.map((r, i) => (
+        <li
+          key={`${r.name}-${offset - i}`}
+          className={clsx(
+            'flex items-center gap-3 rounded-lg border border-slate-200 bg-surface px-3 py-2',
+            i === 0 && 'animate-page-in border-brand-200 bg-brand-50',
+          )}
+          style={{ opacity: 1 - i * 0.18 }}
+        >
+          <span className="flex size-7 items-center justify-center rounded-full bg-linear-to-br from-cyan-400 to-emerald-400 text-[10px] font-bold text-ink-950">
+            {r.name.split(' ').map((w) => w[0]).join('').slice(0, 2)}
+          </span>
+          <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-800">{r.name}</span>
+          <span className="tabular text-xs text-slate-500">IN {r.time}</span>
+          <span className="tabular rounded bg-emerald-50 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-700">{r.score}%</span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function Tile({ className, icon: Icon, title, text, children, delay = 0 }: {
+  className?: string
+  icon: typeof Zap
+  title: string
+  text: string
+  children?: ReactNode
+  delay?: number
+}) {
+  return (
+    <div
+      className={clsx(
+        'reveal group relative overflow-hidden rounded-2xl border border-slate-200 bg-surface p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brand-300 hover:shadow-xl hover:shadow-brand-500/10',
+        className,
+      )}
+      style={{ '--reveal-delay': `${delay}ms` } as CSSProperties}
+    >
+      <div className="pointer-events-none absolute -top-24 -right-24 size-48 rounded-full bg-brand-400/0 blur-3xl transition-colors duration-500 group-hover:bg-brand-400/20" />
+      <span className="flex size-10 items-center justify-center rounded-xl bg-brand-50 text-brand-700 ring-1 ring-brand-200 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+        <Icon size={20} aria-hidden />
+      </span>
+      <h3 className="mt-4 text-base font-semibold text-slate-900">{title}</h3>
+      <p className="mt-1 text-sm text-slate-500">{text}</p>
+      {children && <div className="mt-5">{children}</div>}
+    </div>
+  )
+}
+
+/** Face-scan viewport that tilts gently toward the pointer. */
+function HeroVisual() {
+  const ref = useRef<HTMLDivElement>(null)
+  const onMove = (e: React.PointerEvent) => {
+    const el = ref.current
+    if (!el || e.pointerType !== 'mouse') return
+    const r = el.getBoundingClientRect()
+    el.style.setProperty('--rx', `${((e.clientY - r.top) / r.height - 0.5) * -8}deg`)
+    el.style.setProperty('--ry', `${((e.clientX - r.left) / r.width - 0.5) * 10}deg`)
+  }
+  const reset = () => {
+    ref.current?.style.setProperty('--rx', '0deg')
+    ref.current?.style.setProperty('--ry', '0deg')
+  }
+  return (
+    <div className="relative mx-auto w-full max-w-md perspective-[1200px] lg:max-w-none" onPointerMove={onMove} onPointerLeave={reset}>
+      <div className="absolute -inset-6 rounded-[2rem] bg-linear-to-br from-cyan-400/30 via-transparent to-emerald-400/30 blur-2xl" aria-hidden />
+      <div
+        ref={ref}
+        className="relative transition-transform duration-300 ease-out [transform:rotateX(var(--rx,0deg))_rotateY(var(--ry,0deg))]"
+      >
+        <FaceScan />
       </div>
-    </section>
+      <div className="glass absolute top-16 -left-4 hidden animate-float items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 shadow-lg sm:flex lg:-left-10">
+        <LockKeyhole size={14} className="text-brand-600" aria-hidden />
+        Template encrypted
+      </div>
+      <div
+        className="glass absolute -right-3 bottom-28 hidden animate-float items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 shadow-lg sm:flex lg:-right-8"
+        style={{ animationDelay: '-3.5s' }}
+      >
+        <ServerCog size={14} className="text-brand-600" aria-hidden />
+        0 cloud calls
+      </div>
+    </div>
   )
 }
 
 export function LandingPage() {
   useDocumentTitle('')
+  useReveal()
   const { user } = useAuth()
   const cta = user ? { to: homeFor(user.role), label: 'Open dashboard' } : { to: '/login', label: 'Sign in' }
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   return (
-    <div className="min-h-dvh bg-white">
-      <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+    <div className="min-h-dvh overflow-x-clip bg-canvas">
+      <header className="fixed inset-x-0 top-0 z-40 px-3 pt-3 sm:px-6">
+        <div
+          className={clsx(
+            'mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 rounded-2xl px-3 transition-all duration-300 sm:px-4',
+            scrolled ? 'glass shadow-lg shadow-slate-900/5' : 'border border-transparent',
+          )}
+        >
           <Link to="/" aria-label="SmartFace home">
             <Logo />
           </Link>
-          <nav aria-label="Sections" className="hidden items-center gap-7 text-sm font-medium text-slate-600 md:flex">
-            <a href="#features" className="hover:text-slate-900">Features</a>
-            <a href="#how-it-works" className="hover:text-slate-900">How it works</a>
-            <a href="#security" className="hover:text-slate-900">Security</a>
-            <a href="#faq" className="hover:text-slate-900">FAQ</a>
+          <nav aria-label="Sections" className="hidden items-center gap-1 text-sm font-medium text-slate-600 md:flex">
+            {[
+              ['#how-it-works', 'How it works'],
+              ['#features', 'Features'],
+              ['#privacy', 'Privacy'],
+              ['#faq', 'FAQ'],
+            ].map(([href, label]) => (
+              <a key={href} href={href} className="rounded-full px-3 py-1.5 transition-colors hover:bg-slate-100 hover:text-slate-900">
+                {label}
+              </a>
+            ))}
           </nav>
-          <ButtonLink to={cta.to} size="sm">
-            {cta.label}
-          </ButtonLink>
+          <div className="flex items-center gap-1.5">
+            <ThemeToggle />
+            <ButtonLink to={cta.to} size="sm" className="rounded-full px-4">
+              {cta.label}
+            </ButtonLink>
+          </div>
         </div>
       </header>
 
       <main>
-        <section className="relative overflow-hidden bg-ink-900 px-4 pt-16 pb-20 text-white sm:px-6 sm:pt-24 sm:pb-28">
-          <div
-            className="pointer-events-none absolute inset-0 opacity-[0.07]"
-            style={{
-              backgroundImage:
-                'linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)',
-              backgroundSize: '44px 44px',
-            }}
-            aria-hidden
-          />
-          <div className="relative mx-auto grid max-w-6xl items-center gap-14 lg:grid-cols-[1.1fr_0.9fr]">
-            <div>
-              <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-brand-200">
-                <Network size={14} aria-hidden />
-                Runs entirely on your local network
-              </p>
-              <h1 className="mt-6 text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-                Workplace attendance that records itself, without leaving your building.
+        {/* Hero */}
+        <section className="relative isolate overflow-hidden px-4 pt-28 pb-20 sm:px-6 sm:pt-36 lg:pb-28">
+          <div className="bg-grid absolute inset-0 -z-10 mask-[radial-gradient(ellipse_at_top,black_30%,transparent_75%)]" aria-hidden />
+          <div className="absolute -top-40 left-1/2 -z-10 size-[42rem] -translate-x-1/2 rounded-full bg-linear-to-tr from-cyan-400/25 to-emerald-300/25 blur-3xl dark:from-cyan-500/15 dark:to-emerald-500/10" aria-hidden />
+
+          <div className="mx-auto grid max-w-6xl items-center gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
+            <div className="text-center lg:text-left">
+              <div className="animate-page-in">
+                <Eyebrow>
+                  <span className="relative flex size-2">
+                    <span className="absolute inset-0 animate-ping rounded-full bg-brand-400" />
+                    <span className="relative size-2 rounded-full bg-brand-500" />
+                  </span>
+                  Runs 100% on your network
+                </Eyebrow>
+              </div>
+              <h1
+                className="mt-6 animate-page-in text-[2.6rem] leading-[1.05] font-semibold tracking-tight text-balance text-slate-900 sm:text-6xl lg:text-7xl"
+                style={{ animationDelay: '80ms' }}
+              >
+                Attendance that <span className="text-gradient animate-gradient">knows your face.</span>
               </h1>
-              <p className="mt-5 max-w-xl text-lg text-slate-300">
-                SmartFace recognises enrolled employees at the entrance camera, records arrival times and keeps
-                people in control with review, correction and a complete audit trail.
+              <p className="mx-auto mt-6 max-w-lg animate-page-in text-lg text-slate-600 lg:mx-0" style={{ animationDelay: '160ms' }}>
+                Walk in. You're recorded. Private, local and fully auditable.
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <ButtonLink to={cta.to} className="h-11 bg-brand-500 px-5 hover:bg-brand-400">
+              <div
+                className="mt-9 flex animate-page-in flex-col justify-center gap-3 sm:flex-row lg:justify-start"
+                style={{ animationDelay: '240ms' }}
+              >
+                <ButtonLink to={cta.to} className="group h-12 rounded-full px-6 text-base shadow-lg shadow-brand-500/25">
                   {cta.label}
-                  <ArrowRight size={16} aria-hidden />
+                  <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" aria-hidden />
                 </ButtonLink>
                 <a
                   href="#how-it-works"
-                  className="inline-flex h-11 items-center justify-center rounded-md border border-white/20 px-5 text-sm font-medium text-white hover:bg-white/10"
+                  className="inline-flex h-12 items-center justify-center rounded-full border border-slate-300 bg-surface/60 px-6 text-base font-medium text-slate-700 backdrop-blur transition-colors hover:bg-slate-100 hover:text-slate-900"
                 >
                   See how it works
                 </a>
               </div>
+              <dl className="mx-auto mt-12 grid max-w-md animate-page-in grid-cols-3 gap-4 lg:mx-0" style={{ animationDelay: '320ms' }}>
+                {[
+                  ['0', 'cloud services'],
+                  ['0', 'photos stored'],
+                  ['100%', 'audited'],
+                ].map(([value, label]) => (
+                  <div key={label}>
+                    <dt className="sr-only">{label}</dt>
+                    <dd className="tabular text-2xl font-semibold text-slate-900 sm:text-3xl">{value}</dd>
+                    <dd className="text-xs text-slate-500">{label}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
 
-            <div className="rounded-xl border border-white/10 bg-white/[0.04] p-5 sm:p-6" aria-label="Processing pipeline">
-              <p className="text-xs font-semibold tracking-wider text-slate-400 uppercase">On-premises pipeline</p>
-              <ol className="mt-5 space-y-3">
-                {[
-                  { icon: Camera, label: 'IP camera', sub: 'RTSP stream on the local network' },
-                  { icon: ScanFace, label: 'Detection & quality check', sub: 'Blurry or partial faces are skipped' },
-                  { icon: Fingerprint, label: 'Local template matching', sub: 'Encrypted templates, active employees only' },
-                  { icon: BadgeCheck, label: 'Attendance rules', sub: 'One IN per day; uncertain goes to review' },
-                  { icon: Database, label: 'PostgreSQL & dashboard', sub: 'Reports, corrections, audit log' },
-                ].map((step, i) => (
-                  <li key={step.label} className="flex items-center gap-4 rounded-lg border border-white/10 bg-ink-950/40 px-4 py-3">
-                    <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-white/10 text-brand-200">
-                      <step.icon size={18} aria-hidden />
-                    </span>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-white">
-                        <span className="tabular mr-1.5 text-slate-500">{i + 1}.</span>
-                        {step.label}
-                      </p>
-                      <p className="text-xs text-slate-400">{step.sub}</p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
+            <div className="animate-page-in" style={{ animationDelay: '200ms' }}>
+              <HeroVisual />
             </div>
           </div>
         </section>
 
-        <Section
-          id="features"
-          eyebrow="Features"
-          title="Everything an attendance office needs, and nothing it doesn't"
-          intro="Built for administrators who need dependable records and employees who deserve transparency."
-        >
-          <div className="grid gap-px overflow-hidden rounded-xl border border-slate-200 bg-slate-200 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map((f) => (
-              <div key={f.title} className="bg-white p-6">
-                <f.icon size={20} className="text-brand-700" aria-hidden />
-                <h3 className="mt-4 text-base font-semibold text-slate-900">{f.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{f.text}</p>
-              </div>
-            ))}
-          </div>
-        </Section>
-
-        <div className="border-y border-slate-200 bg-slate-50">
-          <Section
-            id="how-it-works"
-            eyebrow="How it works"
-            title="From enrollment to a reviewed attendance record"
-            intro="Enrollment adds a protected template for each employee. The recognition model itself is never retrained."
-          >
-            <ol className="grid gap-6 md:grid-cols-4">
-              {steps.map((s, i) => (
-                <li key={s.title} className="relative">
-                  <span className="tabular flex size-9 items-center justify-center rounded-full bg-ink-900 text-sm font-semibold text-white">
+        {/* How it works */}
+        <section id="how-it-works" className="scroll-mt-24 px-4 py-20 sm:px-6 sm:py-24">
+          <SectionTitle eyebrow="How it works" title="From face to record in four steps" />
+          <ol className="relative mx-auto mt-14 grid max-w-6xl gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+            <div
+              className="animate-gradient absolute top-7 right-[12%] left-[12%] hidden h-px bg-[linear-gradient(90deg,transparent,#19e3f0,#2af5a0,transparent)] bg-[length:200%_auto] lg:block"
+              aria-hidden
+            />
+            {steps.map((s, i) => (
+              <li key={s.title} className="reveal relative text-center" style={{ '--reveal-delay': `${i * 110}ms` } as CSSProperties}>
+                <span className="relative mx-auto flex size-14 items-center justify-center rounded-2xl border border-slate-200 bg-surface text-brand-700 shadow-lg shadow-brand-500/10">
+                  <s.icon size={24} aria-hidden />
+                  <span className="tabular absolute -top-2 -right-2 flex size-6 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-fg">
                     {i + 1}
                   </span>
-                  <h3 className="mt-4 text-base font-semibold text-slate-900">{s.title}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{s.text}</p>
-                </li>
-              ))}
-            </ol>
-          </Section>
-        </div>
+                </span>
+                <h3 className="mt-5 text-base font-semibold text-slate-900">{s.title}</h3>
+                <p className="mx-auto mt-1 max-w-[16rem] text-sm text-slate-500">{s.text}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
 
-        <Section
-          id="security"
-          eyebrow="Security & privacy"
-          title="Biometric data handled with the care it requires"
-          intro="Facial templates are sensitive. SmartFace is designed to collect the minimum, keep it local and make every privileged action traceable."
-        >
-          <div className="grid gap-8 lg:grid-cols-2">
-            <ul className="space-y-5">
-              {[
-                { icon: ServerCog, title: 'Local deployment', text: 'API, database and recognition service run on a server you control. No external recognition services.' },
-                { icon: LockKeyhole, title: 'Encrypted templates', text: 'Face templates and camera passwords are encrypted at rest. Images are not stored by default.' },
-                { icon: ShieldCheck, title: 'Role-based access', text: 'Administrators, operators and employees each see only what their role allows, enforced on the server.' },
-                { icon: History, title: 'Audit log', text: 'Sign-ins, enrollment, corrections, exports and deletions are recorded in an append-only log.' },
-              ].map((item) => (
-                <li key={item.title} className="flex gap-4">
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-brand-50 text-brand-700">
-                    <item.icon size={19} aria-hidden />
-                  </span>
-                  <div>
-                    <h3 className="text-sm font-semibold text-slate-900">{item.title}</h3>
-                    <p className="mt-1 text-sm text-slate-600">{item.text}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
-              <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                <Users size={17} className="text-slate-500" aria-hidden />
-                Responsible use
-              </h3>
-              <ul className="mt-4 space-y-3 text-sm text-slate-600">
-                <li>Face recognition is probabilistic. A match score is a signal, not proof of identity.</li>
-                <li>Uncertain observations are never assigned automatically. People review them.</li>
-                <li>Employees can view their own records, request corrections and use a manual alternative.</li>
-                <li>Complete a privacy and employment assessment for your jurisdiction before enrolling anyone.</li>
-                <li>Do not use attendance records as the sole basis for consequential employment decisions.</li>
-              </ul>
+        {/* Features bento */}
+        <section id="features" className="scroll-mt-24 px-4 py-20 sm:px-6 sm:py-24">
+          <SectionTitle eyebrow="Features" title="Everything the front desk needs" />
+          <div className="mx-auto mt-14 grid max-w-6xl gap-4 md:grid-cols-3">
+            <Tile className="md:col-span-2 md:row-span-2" icon={Zap} title="Live arrivals" text="Recognised at the door, recorded instantly.">
+              <ArrivalsTicker />
+            </Tile>
+            <Tile icon={ClipboardCheck} title="Human review" text="Uncertain matches wait for a person." delay={80} />
+            <Tile icon={History} title="Full audit trail" text="Every correction, who and why." delay={160} />
+            <Tile icon={FileBarChart} title="Reports & CSV" text="Daily and monthly, filtered your way." delay={80} />
+            <Tile icon={Camera} title="Camera health" text="Real frames, honest status." delay={160}>
+              <div className="flex items-center gap-2 text-xs font-medium text-slate-600">
+                <span className="relative flex size-2">
+                  <span className="absolute inset-0 animate-ping rounded-full bg-emerald-500" />
+                  <span className="relative size-2 rounded-full bg-emerald-500" />
+                </span>
+                Entrance · online
+              </div>
+            </Tile>
+            <Tile icon={ShieldCheck} title="Role-based access" text="Admins, operators, employees." delay={240} />
+          </div>
+        </section>
+
+        {/* Privacy band (always dark, like the logo) */}
+        <section id="privacy" className="scroll-mt-24 px-4 py-12 sm:px-6">
+          <div className="on-dark reveal relative mx-auto max-w-6xl overflow-hidden rounded-3xl bg-ink-950 px-6 py-14 text-white sm:px-12">
+            <div className="bg-grid absolute inset-0 opacity-60 mask-[radial-gradient(ellipse_at_right,black,transparent_70%)]" aria-hidden />
+            <div className="absolute -right-32 -bottom-32 size-96 rounded-full bg-linear-to-tr from-cyan-500/30 to-emerald-400/20 blur-3xl" aria-hidden />
+            <div className="relative grid items-center gap-10 md:grid-cols-[1fr_auto]">
+              <div>
+                <p className="text-sm font-semibold text-[#2af5a0]">Privacy by design</p>
+                <h2 className="mt-3 max-w-lg text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+                  Your faces. Your server. <span className="text-gradient">Nobody else.</span>
+                </h2>
+                <ul className="mt-8 grid gap-3 text-sm text-white/80 sm:grid-cols-3">
+                  {['No photos stored', 'Encrypted templates', 'Works offline'].map((t) => (
+                    <li key={t} className="flex items-center gap-2">
+                      <BadgeCheck size={18} className="shrink-0 text-[#2af5a0]" aria-hidden />
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="relative mx-auto size-40 sm:size-48">
+                <span className="absolute inset-0 animate-pulse-ring rounded-[2rem] border border-[#2af5a0]/50" aria-hidden />
+                <span className="absolute inset-0 animate-pulse-ring rounded-[2rem] border border-[#19e3f0]/40 [animation-delay:1.2s]" aria-hidden />
+                <img src="/brand/logo-512.webp" alt="SmartFace logo" width={192} height={192} className="relative size-full animate-float rounded-[2rem] shadow-2xl shadow-cyan-500/20 ring-1 ring-white/10" />
+              </div>
             </div>
           </div>
-        </Section>
+        </section>
 
-        <div className="border-t border-slate-200 bg-slate-50">
-          <Section id="faq" eyebrow="FAQ" title="Common questions">
-            <div className="divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
-              {faqs.map((f) => (
-                <details key={f.q} className="group px-5 py-4 sm:px-6">
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-medium text-slate-900 [&::-webkit-details-marker]:hidden">
-                    {f.q}
-                    <ChevronDown size={18} className="shrink-0 text-slate-400 transition-transform group-open:rotate-180" aria-hidden />
-                  </summary>
-                  <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-600">{f.a}</p>
-                </details>
-              ))}
+        {/* FAQ */}
+        <section id="faq" className="scroll-mt-24 px-4 py-20 sm:px-6 sm:py-24">
+          <SectionTitle eyebrow="FAQ" title="Good questions" />
+          <div className="mx-auto mt-12 max-w-3xl space-y-3">
+            {faqs.map((f, i) => (
+              <details
+                key={f.q}
+                className="reveal group rounded-2xl border border-slate-200 bg-surface px-5 py-4 transition-colors open:border-brand-300 sm:px-6"
+                style={{ '--reveal-delay': `${i * 70}ms` } as CSSProperties}
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium text-slate-900 [&::-webkit-details-marker]:hidden">
+                  {f.q}
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-all group-open:rotate-180 group-open:bg-brand-50 group-open:text-brand-700">
+                    <ChevronDown size={16} aria-hidden />
+                  </span>
+                </summary>
+                <p className="mt-3 text-sm leading-relaxed text-slate-600">{f.a}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+
+        {/* Final CTA */}
+        <section className="px-4 pb-24 sm:px-6">
+          <div className="reveal mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">Ready when you walk in.</h2>
+            <div className="mt-8 flex justify-center">
+              <ButtonLink to={cta.to} className="group h-12 rounded-full px-7 text-base shadow-lg shadow-brand-500/25">
+                {cta.label}
+                <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" aria-hidden />
+              </ButtonLink>
             </div>
-          </Section>
-        </div>
+          </div>
+        </section>
       </main>
 
-      <footer className="border-t border-slate-200 bg-white px-4 py-10 sm:px-6">
-        <div className="mx-auto flex max-w-6xl flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <Logo />
-            <p className="mt-3 max-w-sm text-sm text-slate-500">
-              On-premises facial recognition attendance. Your data stays on your network.
-            </p>
-          </div>
-          <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-600">
-            <a href="#features" className="hover:text-slate-900">Features</a>
-            <a href="#security" className="hover:text-slate-900">Security</a>
-            <a href="#faq" className="hover:text-slate-900">FAQ</a>
-            <Link to="/login" className="hover:text-slate-900">Sign in</Link>
-          </nav>
+      <footer className="border-t border-slate-200 px-4 py-8 sm:px-6">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-sm text-slate-500 sm:flex-row">
+          <Logo />
+          <p>© {new Date().getFullYear()} SmartFace · On-premises attendance</p>
+          <Link to="/login" className="font-medium hover:text-slate-900">
+            Sign in
+          </Link>
         </div>
-        <p className="mx-auto mt-8 max-w-6xl border-t border-slate-100 pt-6 text-xs text-slate-400">
-          © {new Date().getFullYear()} SmartFace Attendance System.
-        </p>
       </footer>
     </div>
   )

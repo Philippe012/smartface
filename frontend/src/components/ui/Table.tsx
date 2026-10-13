@@ -64,7 +64,7 @@ export function Pagination({
           type="button"
           onClick={() => onPage(page - 1)}
           disabled={page <= 1}
-          className="inline-flex h-8 items-center gap-1 rounded-md border border-slate-300 bg-white px-2.5 font-medium hover:bg-slate-50 disabled:opacity-50"
+          className="inline-flex h-8 items-center gap-1 rounded-md border border-slate-300 bg-surface px-2.5 font-medium hover:bg-slate-50 disabled:opacity-50"
         >
           <ChevronLeft size={15} aria-hidden />
           <span className="hidden sm:inline">Previous</span>
@@ -76,7 +76,7 @@ export function Pagination({
           type="button"
           onClick={() => onPage(page + 1)}
           disabled={page >= pages}
-          className="inline-flex h-8 items-center gap-1 rounded-md border border-slate-300 bg-white px-2.5 font-medium hover:bg-slate-50 disabled:opacity-50"
+          className="inline-flex h-8 items-center gap-1 rounded-md border border-slate-300 bg-surface px-2.5 font-medium hover:bg-slate-50 disabled:opacity-50"
         >
           <span className="hidden sm:inline">Next</span>
           <ChevronRight size={15} aria-hidden />

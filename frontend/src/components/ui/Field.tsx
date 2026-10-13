@@ -11,7 +11,7 @@ import {
 } from 'react'
 
 const control =
-  'block w-full rounded-md border bg-white text-sm text-slate-900 shadow-xs transition-colors ' +
+  'block w-full rounded-lg border bg-surface text-sm text-slate-900 shadow-xs transition-colors ' +
   'placeholder:text-slate-400 focus:outline-none focus:ring-3 disabled:bg-slate-50 disabled:text-slate-500'
 
 function controlClasses(invalid?: boolean, className?: string) {

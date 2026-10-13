@@ -25,6 +25,7 @@ export interface CurrentUser {
   last_login: string | null
   date_joined: string
   password_changed_at: string | null
+  theme_preference: 'system' | 'light' | 'dark'
 }
 
 export type EmployeeStatus = 'active' | 'inactive'

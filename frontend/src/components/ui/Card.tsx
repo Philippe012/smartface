@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import type { ComponentType, HTMLAttributes, ReactNode } from 'react'
 
 export function Card({ className, ...rest }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={clsx('rounded-lg border border-slate-200 bg-white shadow-xs', className)} {...rest} />
+  return <div className={clsx('rounded-xl border border-slate-200 bg-surface shadow-xs transition-shadow duration-300', className)} {...rest} />
 }
 
 export function CardHeader({
@@ -55,14 +55,14 @@ export function StatCard({
     warning: 'bg-amber-50 text-amber-700',
   }[tone]
   return (
-    <Card className="p-4 sm:p-5">
+    <Card className="group p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-lg hover:shadow-brand-500/5 sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-sm font-medium text-slate-500">{label}</p>
           <p className="tabular mt-1.5 text-2xl font-semibold tracking-tight text-slate-900">{value}</p>
         </div>
         {Icon && (
-          <span className={clsx('flex size-9 shrink-0 items-center justify-center rounded-md', iconTone)}>
+          <span className={clsx('flex size-10 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110', iconTone)}>
             <Icon size={18} aria-hidden />
           </span>
         )}

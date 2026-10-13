@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { z } from 'zod'
 
+import { ScanBanner } from '../../components/ScanBanner'
 import { Badge } from '../../components/ui/Badge'
 import { Button, ButtonLink } from '../../components/ui/Button'
 import { Card, CardBody, CardHeader, DetailList, StatCard } from '../../components/ui/Card'
@@ -21,7 +22,7 @@ import { formatDate, formatDateTime, formatTime, fromDateTimeLocal, toDateTimeLo
 import { applyServerErrors } from '../../lib/forms'
 import type { AttendanceEvent, CorrectionKind, CorrectionRequest, MySummary, Paginated } from '../../types/api'
 import { useAuth } from '../auth/AuthContext'
-import { PasswordChangeCard, ProfileForm, SessionsCard } from '../shared/AccountForms'
+import { AppearanceCard, PasswordChangeCard, ProfileForm, SessionsCard } from '../shared/AccountForms'
 import { CorrectionStatusBadge, correctionKindLabel, EventStatusBadge, MatchBadge } from '../shared/StatusBadges'
 
 // --- Correction request dialog -------------------------------------------------
@@ -152,10 +153,12 @@ export function EmployeeDashboardPage() {
 
   return (
     <>
-      <PageHeader
+      <ScanBanner
         title={`Hello, ${data.employee.full_name.split(' ')[0]}`}
         documentTitle="Overview"
-        description={formatDate(data.date)}
+        subtitle={formatDate(data.date)}
+        live={!!data.today}
+        status={data.today ? `Recorded IN at ${formatTime(data.today.occurred_at)}` : 'No arrival recorded yet today'}
         actions={
           <Button variant="secondary" icon={Plus} onClick={() => setRequesting(true)}>
             Report missing attendance
@@ -548,8 +551,11 @@ export function ProfilePage() {
 export function EmployeeSettingsPage() {
   return (
     <>
-      <PageHeader title="Settings" description="Your contact details." />
-      <ProfileForm />
+      <PageHeader title="Settings" description="Appearance and contact details." />
+      <div className="space-y-6">
+        <AppearanceCard />
+        <ProfileForm />
+      </div>
     </>
   )
 }
